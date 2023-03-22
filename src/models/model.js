@@ -9,6 +9,11 @@ const dataSchema = new mongoose.Schema({
     required: true,
     type: Number,
   },
+  email: {
+    required: true,
+    type: String,
+  },
+  senha: String,
 });
 
 module.exports = mongoose.model("Usuario", dataSchema);

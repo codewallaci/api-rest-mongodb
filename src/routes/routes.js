@@ -1,13 +1,46 @@
 const express = require("express");
 const Model = require("../models/model");
-
+const bcrypt = require("bcrypt");
 const router = express.Router();
 
 //Metodo para post
-router.post("/post", async (req, res) => {
+router.post("/registro", async (req, res) => {
+  const { nome, idade, email, senha, confirmarsenha } = req.body;
+  //check de campos recebidos
+  if (!nome) {
+    return res.status(422).json({ msg: "Nome do usuário é obrigatório!" });
+  }
+  if (!idade) {
+    return res.status(422).json({ msg: "A idade do usuário é obrigatório!" });
+  }
+  if (!email) {
+    return res.status(422).json({ msg: "O e-mail do usuário é obrigatório!" });
+  }
+  if (!senha) {
+    return res.status(422).json({ msg: "A senha do usuário é obrigatória!" });
+  }
+  if (senha !== confirmarsenha) {
+    return res.status(422).json({ msg: "As senhas não são iguais!" });
+  }
+
+  //check se o usuário já foi registrado
+  const usuarioExiste = await Model.findOne({ email: email });
+
+  if (usuarioExiste) {
+    return res.status(422).json({ msg: "E-mail já cadastrado." });
+  }
+
+  //Criar senha criptografada.
+  const salt = await bcrypt.genSalt(12);
+  const senhaHash = await bcrypt.hash(senha, salt);
+
+  //Criar usuario
+
   const usuario = new Model({
-    nome: req.body.nome,
-    idade: req.body.idade,
+    nome,
+    idade,
+    email,
+    senha: senhaHash,
   });
 
   try {
